@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { HelmetProvider } from 'react-helmet-async';
 import MetaTags from '../MetaTags';
 
@@ -16,8 +16,10 @@ describe('MetaTags', () => {
     renderWithHelmet(<MetaTags />);
     
     expect(document.title).toBe('Portfolio - Webentwickler');
-    expect(document.querySelector('meta[name="description"]').content)
-      .toBe('Mein persönliches Portfolio als Webentwickler mit Projekten und Erfahrungen');
+    expect(screen.getByRole('meta', { name: 'description' })).toHaveAttribute(
+      'content',
+      'Mein persönliches Portfolio als Webentwickler mit Projekten und Erfahrungen'
+    );
   });
 
   it('updates meta tags with custom props', () => {
@@ -32,8 +34,10 @@ describe('MetaTags', () => {
     );
     
     expect(document.title).toBe(customTitle);
-    expect(document.querySelector('meta[name="description"]').content)
-      .toBe(customDescription);
+    expect(screen.getByRole('meta', { name: 'description' })).toHaveAttribute(
+      'content',
+      customDescription
+    );
   });
 
   it('handles dark mode changes', () => {
@@ -50,8 +54,10 @@ describe('MetaTags', () => {
     
     rerender(<MetaTags />);
     
-    expect(document.querySelector('meta[name="theme-color"]').content)
-      .toBe('#1a1a1a');
+    expect(screen.getByRole('meta', { name: 'theme-color' })).toHaveAttribute(
+      'content',
+      '#1a1a1a'
+    );
   });
 
   it('updates viewport meta tag on resize', () => {
@@ -63,8 +69,10 @@ describe('MetaTags', () => {
     
     rerender(<MetaTags />);
     
-    expect(document.querySelector('meta[name="viewport"]').content)
-      .toContain('maximum-scale=1');
+    expect(screen.getByRole('meta', { name: 'viewport' })).toHaveAttribute(
+      'content',
+      expect.stringContaining('maximum-scale=1')
+    );
   });
 
   it('handles offline mode', () => {
@@ -76,6 +84,6 @@ describe('MetaTags', () => {
     
     rerender(<MetaTags />);
     
-    expect(document.querySelector('meta[name="offline-mode"]')).toBeInTheDocument();
+    expect(screen.getByRole('meta', { name: 'offline-mode' })).toBeInTheDocument();
   });
 }); 
