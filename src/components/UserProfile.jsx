@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../admin/AuthProvider';
 import { useNotification } from '../context/NotificationContext';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { UserIcon } from '@heroicons/react/24/outline';
 
 const UserProfile = () => {
   const { user, updateUser } = useAuth();
