@@ -3,6 +3,21 @@ import { render, screen } from '@testing-library/react';
 import { HelmetProvider } from 'react-helmet-async';
 import MetaTags from '../MetaTags';
 
+// Mock für window.matchMedia
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
+
 describe('MetaTags', () => {
   const renderWithHelmet = (component) => {
     return render(
@@ -11,6 +26,11 @@ describe('MetaTags', () => {
       </HelmetProvider>
     );
   };
+
+  beforeEach(() => {
+    // Reset des matchMedia Mocks vor jedem Test
+    window.matchMedia.mockClear();
+  });
 
   it('renders default meta tags correctly', () => {
     renderWithHelmet(<MetaTags />);
@@ -41,18 +61,19 @@ describe('MetaTags', () => {
   });
 
   it('handles dark mode changes', () => {
-    const { rerender } = renderWithHelmet(<MetaTags />);
-    
-    // Simuliere Dark Mode
-    window.matchMedia = jest.fn().mockImplementation(query => ({
+    // Mock für Dark Mode
+    window.matchMedia.mockImplementation(query => ({
       matches: true,
       media: query,
       onchange: null,
       addListener: jest.fn(),
       removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
     }));
-    
-    rerender(<MetaTags />);
+
+    renderWithHelmet(<MetaTags />);
     
     expect(screen.getByRole('meta', { name: 'theme-color' })).toHaveAttribute(
       'content',
