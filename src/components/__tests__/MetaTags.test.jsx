@@ -4,10 +4,9 @@ import { HelmetProvider } from 'react-helmet-async';
 import MetaTags from '../MetaTags';
 
 // Mock für window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation(query => ({
-    matches: false,
+const mockMatchMedia = (matches = false) => {
+  return jest.fn().mockImplementation(query => ({
+    matches: query === '(prefers-color-scheme: dark)' ? matches : false,
     media: query,
     onchange: null,
     addListener: jest.fn(),
@@ -15,8 +14,8 @@ Object.defineProperty(window, 'matchMedia', {
     addEventListener: jest.fn(),
     removeEventListener: jest.fn(),
     dispatchEvent: jest.fn(),
-  })),
-});
+  }));
+};
 
 describe('MetaTags', () => {
   const renderWithHelmet = (component) => {
@@ -29,7 +28,7 @@ describe('MetaTags', () => {
 
   beforeEach(() => {
     // Reset des matchMedia Mocks vor jedem Test
-    window.matchMedia.mockClear();
+    window.matchMedia = mockMatchMedia();
   });
 
   it('renders default meta tags correctly', () => {
@@ -61,20 +60,12 @@ describe('MetaTags', () => {
   });
 
   it('handles dark mode changes', () => {
-    // Mock für Dark Mode
-    window.matchMedia.mockImplementation(query => ({
-      matches: true,
-      media: query,
-      onchange: null,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
-    }));
+    // Setze Dark Mode Mock
+    window.matchMedia = mockMatchMedia(true);
 
     renderWithHelmet(<MetaTags />);
     
+    // Überprüfe, ob das theme-color Meta-Tag korrekt gesetzt ist
     expect(screen.getByRole('meta', { name: 'theme-color' })).toHaveAttribute(
       'content',
       '#1a1a1a'
@@ -90,6 +81,7 @@ describe('MetaTags', () => {
     
     rerender(<MetaTags />);
     
+    // Überprüfe, ob das viewport Meta-Tag korrekt aktualisiert wurde
     expect(screen.getByRole('meta', { name: 'viewport' })).toHaveAttribute(
       'content',
       expect.stringContaining('maximum-scale=1')
@@ -105,6 +97,7 @@ describe('MetaTags', () => {
     
     rerender(<MetaTags />);
     
+    // Überprüfe, ob das offline-mode Meta-Tag vorhanden ist
     expect(screen.getByRole('meta', { name: 'offline-mode' })).toBeInTheDocument();
   });
 }); 
